@@ -1,22 +1,123 @@
-import logo from './logo.svg';
-import './App.css';
+ import React, { useState, useEffect } from "react";
+import "./App.css";
 
 function App() {
+  const [tasks, setTasks] = useState([]); // Store tasks
+  const [taskName, setTaskName] = useState(""); // Input for task name
+  const [priority, setPriority] = useState("Medium"); // Input for priority
+  const [burstTime, setBurstTime] = useState(5); // Input for CPU burst time
+
+  useEffect(() => {
+    // Simulate task execution
+    const interval = setInterval(() => {
+      setTasks((prevTasks) => {
+        const updatedTasks = [...prevTasks];
+
+        // Find the highest-priority task in the "Waiting" state
+        const runningTaskIndex = updatedTasks.findIndex(
+          (task) => task.state === "Running"
+        );
+
+        if (runningTaskIndex !== -1) {
+          updatedTasks[runningTaskIndex].progress += 1;
+          if (
+            updatedTasks[runningTaskIndex].progress >=
+            updatedTasks[runningTaskIndex].burstTime
+          ) {
+            updatedTasks[runningTaskIndex].state = "Terminated";
+          }
+        } else {
+          const waitingTaskIndex = updatedTasks.findIndex(
+            (task) => task.state === "Waiting"
+          );
+          if (waitingTaskIndex !== -1) {
+            updatedTasks[waitingTaskIndex].state = "Running";
+          }
+        }
+
+        return updatedTasks;
+      });
+    }, 1000); // Adjust interval to simulate execution speed
+
+    return () => clearInterval(interval); // Cleanup interval on unmount
+  }, []);
+
+  const handleAddTask = () => {
+    // Add a new task
+    const newTask = {
+      id: tasks.length + 1,
+      name: taskName,
+      priority,
+      burstTime: parseInt(burstTime),
+      progress: 0,
+      state: "Waiting",
+    };
+    setTasks((prev) =>
+      [...prev, newTask].sort(
+        (a, b) => priorityLevel(b.priority) - priorityLevel(a.priority)
+      )
+    );
+    setTaskName("");
+    setBurstTime(5);
+    setPriority("Medium");
+  };
+
+  const priorityLevel = (level) => {
+    // Define priority levels
+    switch (level) {
+      case "High":
+        return 3;
+      case "Medium":
+        return 2;
+      case "Low":
+        return 1;
+      default:
+        return 0;
+    }
+  };
+
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <h1>Priority-Based Task Manager Simulator</h1>
+        <div className="task-form">
+          <input
+            type="text"
+            placeholder="Task Name"
+            value={taskName}
+            onChange={(e) => setTaskName(e.target.value)}
+          />
+          <select
+            value={priority}
+            onChange={(e) => setPriority(e.target.value)}
+          >
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+          <input
+            type="number"
+            placeholder="Burst Time"
+            value={burstTime}
+            onChange={(e) => setBurstTime(e.target.value)}
+            min="1"
+          />
+          <button onClick={handleAddTask}>Add Task</button>
+        </div>
+        <div className="task-list">
+          <h2>Task List</h2>
+          {tasks.map((task) => (
+            <div key={task.id} className={`task ${task.state.toLowerCase()}`}>
+              <h3>{task.name}</h3>
+              <p>Priority: {task.priority}</p>
+              <p>Burst Time: {task.burstTime}</p>
+              <p>
+                Progress: {task.progress}/{task.burstTime}
+              </p>
+              <p>State: {task.state}</p>
+            </div>
+          ))}
+        </div>
       </header>
     </div>
   );
