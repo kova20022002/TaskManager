@@ -2,18 +2,18 @@
 import "./App.css";
 
 function App() {
-  const [tasks, setTasks] = useState([]); // Store tasks
-  const [taskName, setTaskName] = useState(""); // Input for task name
-  const [priority, setPriority] = useState("Medium"); // Input for priority
-  const [burstTime, setBurstTime] = useState(5); // Input for CPU burst time
+  const [tasks, setTasks] = useState([]);
+  const [taskName, setTaskName] = useState(""); 
+  const [priority, setPriority] = useState("Medium");
+  const [burstTime, setBurstTime] = useState(5); 
 
   useEffect(() => {
-    // Simulate task execution
+    
     const interval = setInterval(() => {
       setTasks((prevTasks) => {
         const updatedTasks = [...prevTasks];
 
-        // Find the highest-priority task in the "Waiting" state
+        
         const runningTaskIndex = updatedTasks.findIndex(
           (task) => task.state === "Running"
         );
@@ -37,13 +37,13 @@ function App() {
 
         return updatedTasks;
       });
-    }, 1000); // Adjust interval to simulate execution speed
+    }, 1000);
 
-    return () => clearInterval(interval); // Cleanup interval on unmount
+    return () => clearInterval(interval);
   }, []);
 
   const handleAddTask = () => {
-    // Add a new task
+    
     const newTask = {
       id: tasks.length + 1,
       name: taskName,
@@ -63,7 +63,6 @@ function App() {
   };
 
   const priorityLevel = (level) => {
-    // Define priority levels
     switch (level) {
       case "High":
         return 3;
